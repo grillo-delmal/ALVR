@@ -227,7 +227,7 @@ dependencies = [
  "android-activity 0.4.0",
  "glow",
  "jni 0.21.1",
- "khronos-egl",
+ "khronos-egl 6.0.0",
  "libc",
  "ndk-context",
  "openxr",
@@ -2704,6 +2704,16 @@ dependencies = [
  "libc",
  "libloading 0.7.4",
  "pkg-config",
+]
+
+[[package]]
+name = "khronos-egl"
+version = "6.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6aae1df220ece3c0ada96b8153459b67eebe9ae9212258bb0134ae60416fdf76"
+dependencies = [
+ "libc",
+ "libloading 0.8.1",
 ]
 
 [[package]]
@@ -5262,7 +5272,7 @@ dependencies = [
  "gpu-descriptor",
  "hassle-rs",
  "js-sys",
- "khronos-egl",
+ "khronos-egl 4.1.0",
  "libc",
  "libloading 0.8.1",
  "log",
