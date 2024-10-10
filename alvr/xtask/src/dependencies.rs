@@ -11,46 +11,6 @@ pub fn choco_install(sh: &Shell, packages: &[&str]) -> Result<(), xshell::Error>
     .run()
 }
 
-pub fn prepare_x264_windows(deps_path: &Path) {
-    let sh = Shell::new().unwrap();
-
-    const VERSION: &str = "0.164";
-    const REVISION: usize = 3086;
-
-    let destination = deps_path.join("x264");
-
-    command::download_and_extract_zip(
-        &format!(
-            "{}/{VERSION}.r{REVISION}/libx264_{VERSION}.r{REVISION}_msvc16.zip",
-            "https://github.com/ShiftMediaProject/x264/releases/download",
-        ),
-        &destination,
-    )
-    .unwrap();
-
-    fs::write(
-        afs::deps_dir().join("x264.pc"),
-        format!(
-            r#"
-prefix={}
-exec_prefix=${{prefix}}/bin/x64
-libdir=${{prefix}}/lib/x64
-includedir=${{prefix}}/include
-
-Name: x264
-Description: x264 library
-Version: {VERSION}
-Libs: -L${{libdir}} -lx264
-Cflags: -I${{includedir}}
-"#,
-            destination.to_string_lossy().replace('\\', "/")
-        ),
-    )
-    .unwrap();
-
-    cmd!(sh, "setx PKG_CONFIG_PATH {deps_path}").run().unwrap();
-}
-
 pub fn prepare_ffmpeg_windows(deps_path: &Path) {
     command::download_and_extract_zip(
         &format!(
@@ -90,7 +50,6 @@ pub fn prepare_windows_deps(skip_admin_priv: bool) {
         .unwrap();
     }
 
-    prepare_x264_windows(&deps_path);
     prepare_ffmpeg_windows(&deps_path);
 }
 
@@ -101,41 +60,7 @@ pub fn prepare_linux_deps(nvenc_flag: bool) {
     sh.remove_path(&deps_path).ok();
     sh.create_dir(&deps_path).unwrap();
 
-    build_x264_linux(&deps_path);
     build_ffmpeg_linux(nvenc_flag, &deps_path);
-}
-
-pub fn build_x264_linux(deps_path: &Path) {
-    let sh = Shell::new().unwrap();
-
-    // x264 0.164
-    command::download_and_extract_tar(
-        "https://code.videolan.org/videolan/x264/-/archive/c196240409e4d7c01b47448d93b1f9683aaa7cf7/x264-c196240409e4d7c01b47448d93b1f9683aaa7cf7.tar.bz2",
-        deps_path,
-    )
-    .unwrap();
-
-    let final_path = deps_path.join("x264");
-
-    fs::rename(
-        deps_path.join("x264-c196240409e4d7c01b47448d93b1f9683aaa7cf7"),
-        &final_path,
-    )
-    .unwrap();
-
-    let flags = ["--enable-static", "--disable-cli", "--enable-pic"];
-
-    let install_prefix = format!("--prefix={}", final_path.join("alvr_build").display());
-
-    let _push_guard = sh.push_dir(final_path);
-
-    cmd!(sh, "./configure {install_prefix} {flags...}")
-        .run()
-        .unwrap();
-
-    let nproc = cmd!(sh, "nproc").read().unwrap();
-    cmd!(sh, "make -j{nproc}").run().unwrap();
-    cmd!(sh, "make install").run().unwrap();
 }
 
 pub fn build_ffmpeg_linux(nvenc_flag: bool, deps_path: &Path) {
@@ -149,7 +74,6 @@ pub fn build_ffmpeg_linux(nvenc_flag: bool, deps_path: &Path) {
     fs::rename(deps_path.join("FFmpeg-n6.0"), &final_path).unwrap();
 
     let flags = [
-        "--enable-gpl",
         "--enable-version3",
         "--enable-static",
         "--disable-programs",
