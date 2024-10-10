@@ -139,7 +139,7 @@ pub fn build_ffmpeg_linux(nvenc_flag: bool, deps_path: &Path) {
                 cmd!(sh, "bash -c {make_header_cmd}").run().unwrap();
             }
 
-            let cuda = pkg_config::Config::new().probe("cuda").unwrap();
+            let cuda = pkg_config::Config::new().probe("cuda-12.6").unwrap();
             let include_flags = cuda
                 .include_paths
                 .iter()
@@ -160,7 +160,7 @@ pub fn build_ffmpeg_linux(nvenc_flag: bool, deps_path: &Path) {
                 "--enable-nonfree",
                 "--enable-cuda-nvcc",
                 "--enable-libnpp",
-                "--nvccflags=\"-gencode arch=compute_52,code=sm_52 -O2\"",
+                "--nvccflags=\"-ccbin /usr/bin/cuda-g++ -gencode arch=compute_52,code=sm_52 -O2\"",
                 &format!("--extra-cflags=\"{include_flags}\""),
                 &format!("--extra-ldflags=\"{link_flags}\""),
             ];
