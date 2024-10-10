@@ -240,12 +240,6 @@ pub fn build_streamer(
         )
         .unwrap();
 
-        sh.copy_file(
-            afs::workspace_dir().join("openvr/bin/linux64/libopenvr_api.so"),
-            build_layout.openvr_driver_lib_dir(),
-        )
-        .unwrap();
-
         let firewall_script = afs::crate_dir("xtask").join("firewall/alvr_fw_config.sh");
         let firewalld = afs::crate_dir("xtask").join("firewall/alvr-firewalld.xml");
         let ufw = afs::crate_dir("xtask").join("firewall/ufw-alvr");

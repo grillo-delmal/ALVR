@@ -3,7 +3,7 @@ use std::{env, fmt::Write, fs, path::PathBuf};
 
 fn main() {
     let openvr_driver_header_string =
-        fs::read_to_string(alvr_filesystem::workspace_dir().join("openvr/headers/openvr_driver.h"))
+        fs::read_to_string("/usr/include/openvr/openvr_driver.h")
             .unwrap();
 
     let property_finder = Regex::new(

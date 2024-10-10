@@ -63,7 +63,7 @@ fn main() {
         .cpp(true)
         .files(source_files_paths)
         .flag_if_supported("-std=c++17")
-        .include(alvr_filesystem::workspace_dir().join("openvr/headers"))
+        .include("/usr/include/openvr")
         .include("cpp");
 
     if platform_name == "windows" {
@@ -178,15 +178,7 @@ fn main() {
         .write_to_file(out_dir.join("bindings.rs"))
         .unwrap();
 
-    if platform_name == "linux" {
-        println!(
-            "cargo:rustc-link-search=native={}",
-            alvr_filesystem::workspace_dir()
-                .join("openvr/lib/linux64")
-                .to_string_lossy()
-        );
-        println!("cargo:rustc-link-lib=openvr_api");
-    } else if platform_name == "windows" {
+    if platform_name == "windows" {
         println!(
             "cargo:rustc-link-search=native={}",
             alvr_filesystem::workspace_dir()
@@ -199,6 +191,7 @@ fn main() {
     #[cfg(target_os = "linux")]
     {
         pkg_config::Config::new().probe("vulkan").unwrap();
+        pkg_config::Config::new().probe("openvr").unwrap();
 
         #[cfg(not(feature = "gpl"))]
         {

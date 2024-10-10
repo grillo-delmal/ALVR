@@ -55,7 +55,7 @@ public:
     virtual void
     GetProjectionRaw(vr::EVREye eEye, float* pfLeft, float* pfRight, float* pfTop, float* pfBottom);
     virtual vr::DistortionCoordinates_t ComputeDistortion(vr::EVREye eEye, float fU, float fV);
-
+    virtual bool ComputeInverseDistortion( vr::HmdVector2_t *pResult, vr::EVREye eEye, uint32_t unChannel, float fU, float fV );
     vr::VRInputComponentHandle_t m_proximity;
 
     std::shared_ptr<CEncoder> m_encoder;
