@@ -139,30 +139,10 @@ pub fn build_ffmpeg_linux(nvenc_flag: bool, deps_path: &Path) {
                 cmd!(sh, "bash -c {make_header_cmd}").run().unwrap();
             }
 
-            let cuda = pkg_config::Config::new().probe("cuda").unwrap();
-            let include_flags = cuda
-                .include_paths
-                .iter()
-                .map(|path| format!("-I{}", path.to_string_lossy()))
-                .reduce(|a, b| format!("{a} {b}"))
-                .expect("pkg-config cuda entry to have include-paths");
-            let link_flags = cuda
-                .link_paths
-                .iter()
-                .map(|path| format!("-L{}", path.to_string_lossy()))
-                .reduce(|a, b| format!("{a} {b}"))
-                .expect("pkg-config cuda entry to have link-paths");
-
             let nvenc_flags = &[
                 "--enable-encoder=h264_nvenc",
                 "--enable-encoder=hevc_nvenc",
                 "--enable-encoder=av1_nvenc",
-                "--enable-nonfree",
-                "--enable-cuda-nvcc",
-                "--enable-libnpp",
-                "--nvccflags=\"-gencode arch=compute_52,code=sm_52 -O2\"",
-                &format!("--extra-cflags=\"{include_flags}\""),
-                &format!("--extra-ldflags=\"{link_flags}\""),
             ];
 
             let env_vars = format!(
