@@ -141,11 +141,8 @@ pub fn build_x264_linux(deps_path: &Path) {
 pub fn build_ffmpeg_linux(nvenc_flag: bool, deps_path: &Path) {
     let sh = Shell::new().unwrap();
 
-    command::download_and_extract_zip(
-        "https://codeload.github.com/FFmpeg/FFmpeg/zip/n6.0",
-        deps_path,
-    )
-    .unwrap();
+    let ffmpeg = &afs::workspace_dir().join("ffmpeg.zip");
+    command::unzip(&sh, &ffmpeg, deps_path).unwrap();
 
     let final_path = deps_path.join("ffmpeg");
 
@@ -174,14 +171,10 @@ pub fn build_ffmpeg_linux(nvenc_flag: bool, deps_path: &Path) {
         "--enable-vulkan",
         "--enable-libdrm",
         "--enable-pic",
-        "--enable-rpath",
         "--fatal-warnings",
     ];
     let install_prefix = format!("--prefix={}", final_path.join("alvr_build").display());
-    // The reason for 4x$ in LDSOFLAGS var refer to https://stackoverflow.com/a/71429999
-    // all varients of --extra-ldsoflags='-Wl,-rpath,$ORIGIN' do not work! don't waste your time trying!
-    //
-    let config_vars = r#"-Wl,-rpath,'$$$$ORIGIN'"#;
+    let config_vars = r#"-Wl"#;
 
     let _push_guard = sh.push_dir(final_path);
     let _env_vars = sh.push_env("LDSOFLAGS", config_vars);
@@ -204,11 +197,8 @@ pub fn build_ffmpeg_linux(nvenc_flag: bool, deps_path: &Path) {
         {
             let codec_header_version = "12.1.14.0";
             let temp_download_dir = deps_path.join("dl_temp");
-            command::download_and_extract_zip(
-                &format!("https://github.com/FFmpeg/nv-codec-headers/archive/refs/tags/n{codec_header_version}.zip"),
-                &temp_download_dir
-            )
-            .unwrap();
+            let codec_header = &afs::workspace_dir().join("nv-codec-headers.zip");
+            command::unzip(&sh, &codec_header, &temp_download_dir).unwrap();
 
             let header_dir = deps_path.join("nv-codec-headers");
             let header_build_dir = header_dir.join("build");
