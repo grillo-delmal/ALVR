@@ -22,7 +22,7 @@ pub fn targz(sh: &Shell, source: &Path) -> Result<(), xshell::Error> {
 }
 
 pub fn download(sh: &Shell, url: &str, destination: &Path) -> Result<(), xshell::Error> {
-    cmd!(sh, "curl -L -o {destination} --url {url}").run()
+    cmd!(sh, "echo {url} {destination}").run()
 }
 
 pub fn download_and_extract_zip(url: &str, destination: &Path) -> Result<(), xshell::Error> {

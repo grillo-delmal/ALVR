@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["alvr/*"]
+members = ["alvr/server_openvr", "alvr/dashboard", "alvr/vulkan_layer", "alvr/vrcompositor_wrapper", "alvr/xtask"]
 
 [workspace.package]
 version = "20.11.1"
@@ -11,7 +11,6 @@ license = "MIT"
 
 [workspace.dependencies]
 alvr_audio = { path = "alvr/audio" }
-alvr_client_core = { path = "alvr/client_core" }
 alvr_common = { path = "alvr/common" }
 alvr_events = { path = "alvr/events" }
 alvr_filesystem = { path = "alvr/filesystem" }
