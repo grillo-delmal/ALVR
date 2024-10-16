@@ -10,6 +10,7 @@ mod logging_backend;
 mod sockets;
 mod statistics;
 mod tracking;
+mod vmc;
 mod web_server;
 
 pub use c_api::*;

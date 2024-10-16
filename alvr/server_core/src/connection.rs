@@ -2,6 +2,7 @@ use crate::{
     bitrate::BitrateManager,
     body_tracking::BodyTrackingSink,
     face_tracking::FaceTrackingSink,
+    vmc::VMCSink,
     hand_gestures::{trigger_hand_gesture_actions, HandGestureManager, HAND_GESTURE_BUTTON_SET},
     input_mapping::ButtonMappingManager,
     sockets::WelcomeSocket,
@@ -893,6 +894,9 @@ fn connection_pipeline(
                         BodyTrackingSink::new(config.sink, settings.connection.osc_local_port).ok()
                     });
 
+            //TODO: Load config
+            let mut vmc_sink = VMCSink::new().ok();
+
             while is_streaming(&client_hostname) {
                 let data = match tracking_receiver.recv(STREAMING_RECV_TIMEOUT) {
                     Ok(tracking) => tracking,
@@ -970,6 +974,16 @@ fn connection_pipeline(
                             htc_lip_expression: tracking.face_data.htc_lip_expression.clone(),
                         })))
                     }
+                }
+
+                if let Some(sink) = &mut vmc_sink {
+                    let device_motions = motions
+                        .iter()
+                        .filter_map(|(id, motion)| {
+                            Some(((*DEVICE_ID_TO_PATH.get(id)?).into(), *motion))
+                        })
+                        .collect();
+                    sink.send_tracking(device_motions);
                 }
 
                 if let Some(sink) = &mut face_tracking_sink {
