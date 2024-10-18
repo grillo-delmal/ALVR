@@ -996,10 +996,10 @@ fn connection_pipeline(
                         let device_motions = motions
                             .iter()
                             .filter_map(|(id, motion)| {
-                                Some(((*DEVICE_ID_TO_PATH.get(id)?).into(), *motion))
+                                Some((*id, *motion))
                             })
-                            .collect();
-                        sink.send_tracking(device_motions);
+                            .collect::<Vec<(u64, _)>>();
+                            sink.send_tracking(&device_motions);
                     }
                 }
 
