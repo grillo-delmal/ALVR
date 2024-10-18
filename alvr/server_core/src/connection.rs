@@ -29,7 +29,7 @@ use alvr_packets::{
 };
 use alvr_session::{
     BodyTrackingConfig, BodyTrackingSinkConfig, CodecType, ControllersEmulationMode, FrameSize,
-    H264Profile, OpenvrConfig, SessionConfig,
+    H264Profile, OpenvrConfig, SessionConfig, VMCConfig, 
 };
 use alvr_sockets::{
     PeerType, ProtoControlSocket, StreamSocketBuilder, KEEPALIVE_INTERVAL, KEEPALIVE_TIMEOUT,
@@ -895,7 +895,14 @@ fn connection_pipeline(
                     });
 
             //TODO: Load config
-            let mut vmc_sink = VMCSink::new().ok();
+            let mut vmc_sink = 
+                settings
+                    .headset
+                    .vmc
+                    .into_option()
+                    .and_then(|config| {
+                        VMCSink::new(config.sink).ok()
+                    });
 
             while is_streaming(&client_hostname) {
                 let data = match tracking_receiver.recv(STREAMING_RECV_TIMEOUT) {
@@ -976,14 +983,24 @@ fn connection_pipeline(
                     }
                 }
 
-                if let Some(sink) = &mut vmc_sink {
-                    let device_motions = motions
-                        .iter()
-                        .filter_map(|(id, motion)| {
-                            Some(((*DEVICE_ID_TO_PATH.get(id)?).into(), *motion))
-                        })
-                        .collect();
-                    sink.send_tracking(device_motions);
+                let publish_vmc = {
+                    let session_manager_lock = SESSION_MANAGER.read();
+                    matches!(
+                        session_manager_lock.settings().headset.vmc,
+                        Switch::Enabled(VMCConfig { publish: true, .. })
+                    )
+                };
+
+                if publish_vmc {
+                    if let Some(sink) = &mut vmc_sink {
+                        let device_motions = motions
+                            .iter()
+                            .filter_map(|(id, motion)| {
+                                Some(((*DEVICE_ID_TO_PATH.get(id)?).into(), *motion))
+                            })
+                            .collect();
+                        sink.send_tracking(device_motions);
+                    }
                 }
 
                 if let Some(sink) = &mut face_tracking_sink {
